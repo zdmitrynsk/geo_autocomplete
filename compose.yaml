@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:5.0
+    container_name: mongo
+    restart: always
+    ports:
+      - "127.0.0.1:3231:27017"
+    volumes:
+      - ./mongo_data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME="${MONGO_INITDB_ROOT_USERNAME}"
+      - MONGO_INITDB_ROOT_PASSWORD="${MONGO_INITDB_ROOT_PASSWORD}"
+
+  api:
+    build: .
+    ports:
+      - "127.0.0.1:3230:8000"
+    volumes:
+      - ./app:/app/app
+    restart: always
+    environment:
+      GOOGLE_API_KEY: "${GOOGLE_API_KEY}"
+      MONGODB_URI: "${MONGODB_URI}"
+    depends_on:
+      - mongo
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - "3232:8081"
+    environment:
+      ME_CONFIG_MONGODB_URL: "${MONGODB_URI}"
+      ME_CONFIG_BASICAUTH_ENABLED: true
+      ME_CONFIG_BASICAUTH_USERNAME: mongoexpressuser
+      ME_CONFIG_BASICAUTH_PASSWORD: mongoexpresspass
+
+volumes:
+  mongo_data:
